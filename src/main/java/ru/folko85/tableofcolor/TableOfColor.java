@@ -3,12 +3,19 @@ package ru.folko85.tableofcolor;
 import java.util.*;
 import java.util.stream.Collectors;
 
+//ToDo
+// 2. Реализовать парсинг yml
+// 3. Протестировать все методы
+// 4. Проверить на реальной программе
+// 5. Выделить в библиотеку и выложить на гитхабе
+// 6. Запилить статью
+
 public class TableOfColor {
     Locale locale;
     String ymlFile;
     private List<ColorPoint> colors;
     private List<BucketOfColor> buckets = new ArrayList<>();
-    private final int[] startPoint = new int[]{0, 0, 0};       // все нащи цыета находятся в этом диапазоне
+    private final int[] startPoint = new int[]{0, 0, 0};       // все наши цвета находятся в этом диапазоне
     private final int[] endPoint = new int[]{256, 256, 256};
     static int maxPointsCount = 5;        // захардкодим это во имя наивысшей справедливости
 
@@ -67,28 +74,39 @@ public class TableOfColor {
         BucketOfColor targetBucket = findBucket(targetPoint); // даже если в ходе поиска у нас прибавится вёдер - не страшно
         List<ColorPoint> searchArea = targetBucket.getBucketPoints();
         // строим карту названий - расстояний
-        Map<String, Double> bestCandidates = searchArea.stream().collect(Collectors
-                .toMap(point -> point.getColorName(), point -> ColorPoint.calculateDistance(point, targetPoint)));
-        Map.Entry<String, Double> minDistancePoint = bestCandidates.entrySet().stream()
-                .min(Comparator.comparing(Map.Entry::getValue)).get();// и вычисляем минимальное
-        double distanceToSide = distanceToBucketSide(targetPoint, targetBucket);  // находим рассояние до ближайшей стороны
+
+        Map.Entry<String, Double> minDistancePoint = getNearestNamedColor(searchArea, targetPoint);// и вычисляем минимальное
+
+        double distanceToSide = getDistanceToBucketSide(targetPoint, targetBucket);  // находим рассояние до ближайшей стороны
 
         if (distanceToSide > minDistancePoint.getValue()) {  // если именованная точка ближе стороны, то возвращаем её
             return minDistancePoint.getKey();
-        }
-        else {
-            //ToDo
-            // 1. Метод поиска вторых кандидатов из мега-ведра или из нескольких ведёр
-            // 2. Реализовать парсинг yml
-            // 3. Протестировать все методы
-            // 4. Проверить на реальной программе
-            // 5. Выделить в библиотеку и выложить на гитхабе
-            // 6. Запилить статью
-            return null;
+        } else {
+            int[] startBigBucket = new int[3];
+            int[] endBigBucket = new int[3];
+            for (int i = 0; i < 3; i++) {
+                startBigBucket[i] = targetPoint.getCoordinates()[i] - minDistancePoint.getValue().intValue();  // точность? да ну нафиг
+                endBigBucket[i] = targetPoint.getCoordinates()[i] + minDistancePoint.getValue().intValue();
+            }
+            BucketOfColor extendedBucked = new BucketOfColor(startBigBucket, endBigBucket);
+            List<ColorPoint> secondArea = colors.stream().filter(extendedBucked::isContainPoint)
+                    .filter(p -> !searchArea.contains(p)).collect(Collectors.toList());
+
+            Map.Entry<String, Double> secondPoint = getNearestNamedColor(secondArea, targetPoint);
+
+            return (secondPoint.getValue() < minDistancePoint.getValue()) ? secondPoint.getKey() : minDistancePoint.getKey();
+            // без тернарного оператора нам не обойтись
         }
     }
 
-    public static double distanceToBucketSide(ColorPoint targetPoint, BucketOfColor targetBucket)  // у параллерограмма 6 сторон
+    public static Map.Entry<String, Double> getNearestNamedColor(List<ColorPoint> candidates, ColorPoint targetPoint) {
+        Map<String, Double> candidatesMap = candidates.stream()
+                .collect(Collectors.toMap(ColorPoint::getColorName, cp -> ColorPoint.calculateDistance(cp, targetPoint)));
+        return candidatesMap.entrySet().stream()
+                .min(Map.Entry.comparingByValue()).get();
+    }
+
+    public static double getDistanceToBucketSide(ColorPoint targetPoint, BucketOfColor targetBucket)  // у параллерограмма 6 сторон
     {
         //расстояние до староны - разность соответствующих координат
         int[] pointCoordinates = targetPoint.getCoordinates();
