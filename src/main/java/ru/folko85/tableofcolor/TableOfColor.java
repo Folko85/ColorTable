@@ -1,10 +1,13 @@
 package ru.folko85.tableofcolor;
 
+import org.yaml.snakeyaml.Yaml;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
 //ToDo
-// 2. Реализовать парсинг yml
 // 3. Протестировать все методы
 // 4. Проверить на реальной программе
 // 5. Выделить в библиотеку и выложить на гитхабе
@@ -28,7 +31,15 @@ public class TableOfColor {
     }
 
     private List<ColorPoint> extractYml(String ymlFile) {
-        return null;                                          // тут мы будем формировать список колорпойнтов
+        Yaml yaml = new Yaml();
+        List<ColorPoint> colorPoints = new ArrayList<>();
+        try (InputStream input = new FileInputStream(new File(ymlFile))) {
+            Map<String, String> colors = (Map<String, String>) yaml.load(ymlFile);
+            colors.forEach((k, v) -> colorPoints.add(new ColorPoint(k, v)));
+        } catch (Exception ex) {
+            ex.printStackTrace();            // сюда привинтим логгер
+        }
+        return colorPoints;
     }
 
     private void distributePoints(List<ColorPoint> points) {
@@ -39,7 +50,7 @@ public class TableOfColor {
     }
 
     private BucketOfColor findBucket(ColorPoint point) {
-        BucketOfColor resultBucket = buckets.stream().filter(bucket -> bucket.isContainPoint(point)).findFirst().get(); // находим ведро для точки
+        BucketOfColor resultBucket = buckets.stream().filter(bucket -> bucket.isContainPoint(point)).findFirst().orElseThrow(); // находим ведро для точки
         if (resultBucket.getSize() < maxPointsCount) {
             return resultBucket;
         } else {
@@ -103,7 +114,7 @@ public class TableOfColor {
         Map<String, Double> candidatesMap = candidates.stream()
                 .collect(Collectors.toMap(ColorPoint::getColorName, cp -> ColorPoint.calculateDistance(cp, targetPoint)));
         return candidatesMap.entrySet().stream()
-                .min(Map.Entry.comparingByValue()).get();
+                .min(Map.Entry.comparingByValue()).orElseThrow();
     }
 
     public static double getDistanceToBucketSide(ColorPoint targetPoint, BucketOfColor targetBucket)  // у параллерограмма 6 сторон
