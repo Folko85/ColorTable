@@ -1,8 +1,6 @@
 package ru.folko85.tableofcolor;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -19,13 +17,13 @@ public class TableOfColor {
 
     public TableOfColor() {            // если язык не указан, то будет русский и цвета не будут сортироваться по вёдрам
         this.locale = new Locale("ru");      // тестим на русской версии
-        this.ymlFile = "./" +  locale.getLanguage() + ".yml";
+        this.ymlFile = locale.getLanguage() + ".yml";
         this.colors = extractYml(this.ymlFile);
     }
 
     public TableOfColor(Locale locale) {
         this.locale = locale;
-        this.ymlFile = "/" + locale.getLanguage() + ".yml";
+        this.ymlFile = locale.getLanguage() + ".yml";
         this.colors = extractYml(this.ymlFile);
         this.buckets.add(new BucketOfColor(startPoint, endPoint));
         distributePoints(colors);               // распределим все точки по вёдрам
@@ -33,12 +31,9 @@ public class TableOfColor {
 
     private List<ColorPoint> extractYml(String ymlFile) {  // так криво, потому что некогда разбираться в парсерах ради простенькой операции
         List<ColorPoint> colorPoints = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(TableOfColor.class.getResourceAsStream(ymlFile)))) {
-            String colorLine;
-            List<String> lines = new ArrayList<>();
-            while ((colorLine = reader.readLine()) != null) {
-                lines.add(colorLine);
-            }
+        File file = new File(getClass().getResource(ymlFile).getFile());
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(file.getPath()));
             lines.remove(1);
             lines.remove(0);
             colorPoints = lines.stream().map(line -> {

@@ -9,12 +9,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import static junit.framework.TestCase.assertEquals;
 
 public class TableOfColorTest {
-    String ymlTest = "./src/test/resources/test.yml";
+   String ymlTest = "ru.yml";
     TableOfColor table;
 
     @Before
