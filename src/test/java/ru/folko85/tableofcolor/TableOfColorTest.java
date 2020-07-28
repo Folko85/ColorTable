@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -17,8 +18,8 @@ public class TableOfColorTest {
     TableOfColor table;
 
     @Before
-    public void setUp() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        table = new TableOfColor(new Locale("ru"));
+    public void setUp() throws IOException {
+        table = new TableOfColor();
     }
 
     @Test
