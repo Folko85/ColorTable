@@ -1,6 +1,8 @@
 package ru.folko85.tableofcolor;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -31,10 +33,13 @@ public class TableOfColor {
 
     private List<ColorPoint> extractYml(String ymlFile) {  // так криво, потому что некогда разбираться в парсерах ради простенькой операции
         ClassLoader classLoader = this.getClass().getClassLoader();
-        File file = new File(classLoader.getResource(ymlFile).getFile());
         List<ColorPoint> colorPoints = new ArrayList<>();
-        try {
-            List<String> lines = Files.readAllLines(Paths.get(file.getPath()));
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(classLoader.getResourceAsStream(ymlFile)))) {
+            String colorLine;
+            List<String> lines = new ArrayList<>();
+            while ((colorLine = reader.readLine()) != null) {
+                lines.add(colorLine);
+            }
             lines.remove(1);
             lines.remove(0);
             colorPoints = lines.stream().map(line -> {
