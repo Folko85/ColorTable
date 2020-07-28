@@ -9,6 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static junit.framework.TestCase.assertEquals;
 
@@ -18,7 +19,7 @@ public class TableOfColorTest {
 
     @Before
     public void setUp() throws IOException {
-        table = new TableOfColor();
+        table = new TableOfColor(new Locale("ru"));
     }
 
     @Test
@@ -37,7 +38,7 @@ public class TableOfColorTest {
     @Test
     public void testFindNamedColorFromHex() {
         String code = "ABAB09";
-        String mustBe = "Яблочно-зеленый";
+        String mustBe = "Зелёная лужайка";
         String really = table.findNamedColorFromHex(code);
         assertEquals(mustBe, really);
     }

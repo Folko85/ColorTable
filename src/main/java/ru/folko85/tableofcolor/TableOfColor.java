@@ -30,8 +30,9 @@ public class TableOfColor {
     }
 
     private List<ColorPoint> extractYml(String ymlFile) {  // так криво, потому что некогда разбираться в парсерах ради простенькой операции
+        ClassLoader classLoader = this.getClass().getClassLoader();
+        File file = new File(classLoader.getResource(ymlFile).getFile());
         List<ColorPoint> colorPoints = new ArrayList<>();
-        File file = new File(getClass().getResource(ymlFile).getFile());
         try {
             List<String> lines = Files.readAllLines(Paths.get(file.getPath()));
             lines.remove(1);
