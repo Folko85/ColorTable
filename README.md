@@ -30,3 +30,12 @@
 Внимание!!! Версии ниже 1.0.3 работают некорректно.
 P.S. Зависимость может подсвечиваться красным, пока не выполнен импорт библиотеки.
 Но если она остаётся красным и после импорта - проверьте правильность ввода данных.
+
+Пример использования.
+
+    String hexCode = FF00FF;
+    ColorTable colorTable = new ColorTable(new Locale("ru"));
+    String color = colorTable.findNamedColorFromHex(hexCode);
+    System.out.println(color);
+    
+    
