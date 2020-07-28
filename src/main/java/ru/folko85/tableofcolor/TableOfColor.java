@@ -1,41 +1,43 @@
 package ru.folko85.tableofcolor;
 
-import org.yaml.snakeyaml.Yaml;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-//ToDo
-// 3. Протестировать все методы
-// 4. Проверить на реальной программе
-// 5. Выделить в библиотеку и выложить на гитхабе
-// 6. Запилить статью
-
 public class TableOfColor {
-    Locale locale;
-    String ymlFile;
+    private Locale locale;
+    private String ymlFile;
     private List<ColorPoint> colors;
     private List<BucketOfColor> buckets = new ArrayList<>();
     private final int[] startPoint = new int[]{0, 0, 0};       // все наши цвета находятся в этом диапазоне
     private final int[] endPoint = new int[]{256, 256, 256};
     static int maxPointsCount = 5;        // захардкодим это во имя наивысшей справедливости
 
+    public TableOfColor() {            // если язык не указан, то будет русский и цвета не будут сортироваться по вёдрам
+        this.locale = new Locale("ru");      // тестим на русской версии
+        this.ymlFile = "./src/main/resources/" + locale.getLanguage() + ".yml";
+        this.colors = extractYml(this.ymlFile);
+    }
+
     public TableOfColor(Locale locale) {
         this.locale = locale;
-        this.ymlFile = locale.getLanguage() + ".yml";
+        this.ymlFile = "./src/main/resources/" + locale.getLanguage() + ".yml";
         this.colors = extractYml(this.ymlFile);
         this.buckets.add(new BucketOfColor(startPoint, endPoint));
         distributePoints(colors);               // распределим все точки по вёдрам
     }
 
-    private List<ColorPoint> extractYml(String ymlFile) {
-        Yaml yaml = new Yaml();
+    private List<ColorPoint> extractYml(String ymlFile) {  // так криво, потому что некогда разбираться в парсерах ради простенькой операции
         List<ColorPoint> colorPoints = new ArrayList<>();
-        try (InputStream input = new FileInputStream(new File(ymlFile))) {
-            Map<String, String> colors = (Map<String, String>) yaml.load(ymlFile);
-            colors.forEach((k, v) -> colorPoints.add(new ColorPoint(k, v)));
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(ymlFile));
+            lines.remove(1);
+            lines.remove(0);
+            colorPoints = lines.stream().map(line -> {
+                String[] map = line.split(":");
+                return new ColorPoint(map[0].trim(), map[1].trim());
+            }).collect(Collectors.toList());
         } catch (Exception ex) {
             ex.printStackTrace();            // сюда привинтим логгер
         }
@@ -59,18 +61,19 @@ public class TableOfColor {
         }
     }
 
-//    private List<ColorPoint> findSearchArea(ColorPoint point) {  // область поиска не всегда равна ведру
-//        BucketOfColor resultBucket = buckets.stream().filter(bucket -> bucket.isContainPoint(point)).findFirst().get(); // находим ведро для точки
-//        return resultBucket.getBucketPoints();
-//    }
-
     private void splitBucket(BucketOfColor resultBucket) {
         int bestAxis = resultBucket.getBestColorAxis();
         int newBound = resultBucket.getBoundPlane(bestAxis);       // при делении параллерограма плоскостью
-        int[] leftBoundCoordinates = resultBucket.getEndCoordinates();// у условно левой части изменится конечная координата
-        int[] rightBoundCoordinates = resultBucket.getStartCoordinates(); // у условно правой части начальная координата
+        int[] leftBoundCoordinates = new int[3];
+        // у условно левой части изменится конечная координата
+        int[] rightBoundCoordinates = new int[3];
+        resultBucket.getStartCoordinates(); // у условно правой части начальная координата
+        for (int j = 0; j < 3; j++) {
+            leftBoundCoordinates[j] = resultBucket.getEndCoordinates()[j];
+            rightBoundCoordinates[j] = resultBucket.getStartCoordinates()[j];
+        }
         leftBoundCoordinates[bestAxis] = newBound;
-        rightBoundCoordinates[bestAxis] = newBound;
+        rightBoundCoordinates[bestAxis] = newBound + 1;
         BucketOfColor leftBucket = new BucketOfColor(resultBucket.getStartCoordinates(), leftBoundCoordinates);
         BucketOfColor rightBucket = new BucketOfColor(rightBoundCoordinates, resultBucket.getEndCoordinates());
         List<ColorPoint> reDistributedPoints = resultBucket.getBucketPoints();
@@ -80,7 +83,7 @@ public class TableOfColor {
         distributePoints(reDistributedPoints);   //перераспределяем точки тем же методом, что и начали распределять их
     }
 
-    public String findNamedColor(String hexCode) {
+    public String findNamedColorFromHex(String hexCode) {
         ColorPoint targetPoint = new ColorPoint(hexCode);
         BucketOfColor targetBucket = findBucket(targetPoint); // даже если в ходе поиска у нас прибавится вёдер - не страшно
         List<ColorPoint> searchArea = targetBucket.getBucketPoints();
@@ -102,7 +105,9 @@ public class TableOfColor {
             BucketOfColor extendedBucked = new BucketOfColor(startBigBucket, endBigBucket);
             List<ColorPoint> secondArea = colors.stream().filter(extendedBucked::isContainPoint)
                     .filter(p -> !searchArea.contains(p)).collect(Collectors.toList());
-
+            if (secondArea.size() == 0) {       // если точек в близлежащих вёдрах нет
+                return minDistancePoint.getKey();
+            }
             Map.Entry<String, Double> secondPoint = getNearestNamedColor(secondArea, targetPoint);
 
             return (secondPoint.getValue() < minDistancePoint.getValue()) ? secondPoint.getKey() : minDistancePoint.getKey();
@@ -110,16 +115,16 @@ public class TableOfColor {
         }
     }
 
-    public static Map.Entry<String, Double> getNearestNamedColor(List<ColorPoint> candidates, ColorPoint targetPoint) {
+    private static Map.Entry<String, Double> getNearestNamedColor(List<ColorPoint> candidates, ColorPoint targetPoint) {
         Map<String, Double> candidatesMap = candidates.stream()
                 .collect(Collectors.toMap(ColorPoint::getColorName, cp -> ColorPoint.calculateDistance(cp, targetPoint)));
         return candidatesMap.entrySet().stream()
                 .min(Map.Entry.comparingByValue()).orElseThrow();
     }
 
-    public static double getDistanceToBucketSide(ColorPoint targetPoint, BucketOfColor targetBucket)  // у параллерограмма 6 сторон
+    private static double getDistanceToBucketSide(ColorPoint targetPoint, BucketOfColor targetBucket)  // у параллерограмма 6 сторон
     {
-        //расстояние до староны - разность соответствующих координат
+        //расстояние до стороны - разность соответствующих координат
         int[] pointCoordinates = targetPoint.getCoordinates();
         int[] startBucketCoordinates = targetBucket.getStartCoordinates();
         int[] endBucketCoordinates = targetBucket.getStartCoordinates();
