@@ -1,27 +1,18 @@
 package ru.folko85.tableofcolor;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class TableOfColor {
-    private Locale locale;
-    private String ymlFile;
-    private List<ColorPoint> colors;
-    private List<BucketOfColor> buckets = new ArrayList<>();
-    private final int[] startPoint = new int[]{0, 0, 0};       // все наши цвета находятся в этом диапазоне
-    private final int[] endPoint = new int[]{256, 256, 256};
-    static int maxPointsCount = 5;        // захардкодим это во имя наивысшей справедливости
-
-    public TableOfColor() {            // если язык не указан, то будет русский и цвета не будут сортироваться по вёдрам
-        this.locale = new Locale("ru");      // тестим на русской версии
-        this.ymlFile = locale.getLanguage() + ".yml";
-        this.colors = extractYml(this.ymlFile);
-    }
+    private final Locale locale;
+    private final String ymlFile;
+    private final List<ColorPoint> colors;
+    private final List<BucketOfColor> buckets = new ArrayList<>();
+    private int[] startPoint = new int[]{0, 0, 0};       // все наши цвета находятся в этом диапазоне
+    private int[] endPoint = new int[]{256, 256, 256};
+    static int maxPointsCount = 5;        // это значение мы ещё будем вычислять на тестах
 
     public TableOfColor(Locale locale) {
         this.locale = locale;
@@ -47,7 +38,7 @@ public class TableOfColor {
                 return new ColorPoint(map[0].trim(), map[1].trim());
             }).collect(Collectors.toList());
         } catch (Exception ex) {
-            ex.printStackTrace();            // сюда привинтим логгер
+            ex.printStackTrace();            // сюда привинтим логгер, но позже
         }
         return colorPoints;
     }
@@ -71,7 +62,7 @@ public class TableOfColor {
 
     private void splitBucket(BucketOfColor resultBucket) {
         int bestAxis = resultBucket.getBestColorAxis();
-        int newBound = resultBucket.getBoundPlane(bestAxis);       // при делении параллерограма плоскостью
+        int newBound = resultBucket.getBoundPlane(bestAxis);       // при делении параллелограмма плоскостью
         int[] leftBoundCoordinates = new int[3];
         // у условно левой части изменится конечная координата
         int[] rightBoundCoordinates = new int[3];
@@ -99,7 +90,7 @@ public class TableOfColor {
 
         Map.Entry<String, Double> minDistancePoint = getNearestNamedColor(searchArea, targetPoint);// и вычисляем минимальное
 
-        double distanceToSide = getDistanceToBucketSide(targetPoint, targetBucket);  // находим рассояние до ближайшей стороны
+        double distanceToSide = getDistanceToBucketSide(targetPoint, targetBucket);  // находим расстояние до ближайшей стороны
 
         if (distanceToSide > minDistancePoint.getValue()) {  // если именованная точка ближе стороны, то возвращаем её
             return minDistancePoint.getKey();
@@ -107,7 +98,7 @@ public class TableOfColor {
             int[] startBigBucket = new int[3];
             int[] endBigBucket = new int[3];
             for (int i = 0; i < 3; i++) {
-                startBigBucket[i] = targetPoint.getCoordinates()[i] - minDistancePoint.getValue().intValue();  // точность? да ну нафиг
+                startBigBucket[i] = targetPoint.getCoordinates()[i] - minDistancePoint.getValue().intValue();  // точность? ну уж нет
                 endBigBucket[i] = targetPoint.getCoordinates()[i] + minDistancePoint.getValue().intValue();
             }
             BucketOfColor extendedBucked = new BucketOfColor(startBigBucket, endBigBucket);
@@ -130,7 +121,7 @@ public class TableOfColor {
                 .min(Map.Entry.comparingByValue()).orElseThrow();
     }
 
-    private static double getDistanceToBucketSide(ColorPoint targetPoint, BucketOfColor targetBucket)  // у параллерограмма 6 сторон
+    private static double getDistanceToBucketSide(ColorPoint targetPoint, BucketOfColor targetBucket)  // у параллелограмма 6 сторон
     {
         //расстояние до стороны - разность соответствующих координат
         int[] pointCoordinates = targetPoint.getCoordinates();
@@ -141,7 +132,7 @@ public class TableOfColor {
             if (distance > (pointCoordinates[i] - startBucketCoordinates[i])) { // начальные стороны будут заведомо меньше координат точки
                 distance = pointCoordinates[i] - startBucketCoordinates[i];
             }
-            if (distance > (endBucketCoordinates[i] - pointCoordinates[i])) { // конечные столроны заведомо больше
+            if (distance > (endBucketCoordinates[i] - pointCoordinates[i])) { // конечные стороны заведомо больше
                 distance = endBucketCoordinates[i] - pointCoordinates[i];
             }
         }

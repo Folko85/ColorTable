@@ -3,8 +3,9 @@ package ru.folko85.tableofcolor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import ru.folko85.tableofcolor.ColorPoint;
+import ru.folko85.tableofcolor.TableOfColor;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -18,8 +19,8 @@ public class TableOfColorTest {
     TableOfColor table;
 
     @Before
-    public void setUp() throws IOException {
-        table = new TableOfColor(new Locale("ru"));
+    public void setUp() {
+        table = new TableOfColor(new Locale("en"));
     }
 
     @Test
@@ -38,7 +39,7 @@ public class TableOfColorTest {
     @Test
     public void testFindNamedColorFromHex() {
         String code = "ABAB09";
-        String mustBe = "Зелёная лужайка";
+        String mustBe = "DarkGoldenrod";
         String really = table.findNamedColorFromHex(code);
         assertEquals(mustBe, really);
     }

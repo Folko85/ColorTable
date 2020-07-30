@@ -5,11 +5,11 @@ public class ColorPoint implements Comparable<ColorPoint> {
     private static final int gCodeIndex = 1;
     private static final int bCodeIndex = 2;
     private String colorName;
-    private String hexCode;
-    private int rValue;
-    private int gValue;
-    private int bValue;
-    private int[] coordinates;
+    private final String hexCode;
+    private final int rValue;
+    private final int gValue;
+    private final int bValue;
+    private final int[] coordinates;
 
     protected ColorPoint(String colorName, String hexCode) {   // для каждого цвета определим все возможные представления параметров
         this.colorName = colorName;
@@ -20,24 +20,6 @@ public class ColorPoint implements Comparable<ColorPoint> {
         this.bValue = coordinates[bCodeIndex];
     }
 
-    protected ColorPoint(String colorName, int[] coordinates) {
-        this.colorName = colorName;
-        this.hexCode = hexFromCoordinates(coordinates);
-        this.coordinates = coordinates;
-        this.rValue = coordinates[rCodeIndex];
-        this.gValue = coordinates[gCodeIndex];
-        this.bValue = coordinates[bCodeIndex];
-    }
-
-    protected ColorPoint(String colorName, int rValue, int gValue, int bValue) {
-        this.colorName = colorName;
-        this.rValue = rValue;
-        this.gValue = gValue;
-        this.bValue = bValue;
-        this.coordinates = new int[]{rValue, gValue, bValue};
-        this.hexCode = hexFromRGB(rValue, gValue, bValue);
-    }
-
     protected ColorPoint(String hexCode) {   // конструктор для безымянных точек для служебных целей
         this.hexCode = hexCode;
         this.coordinates = coordinateFromHex(hexCode);
@@ -46,22 +28,12 @@ public class ColorPoint implements Comparable<ColorPoint> {
         this.bValue = coordinates[bCodeIndex];
     }
 
-    protected String hexFromCoordinates(int[] coordinates) {
-        int r = coordinates[rCodeIndex];
-        int g = coordinates[gCodeIndex];
-        int b = coordinates[bCodeIndex];
-        return String.format("%02x%02x%02x", r, g, b);
-    }
-
     protected static int[] coordinateFromHex(String hexCode) {
-        int r = Integer.valueOf(hexCode.substring(0, 2), 16);
-        int g = Integer.valueOf(hexCode.substring(2, 4), 16);
-        int b = Integer.valueOf(hexCode.substring(4, 6), 16);
+        String lowerHex = hexCode.toLowerCase();
+        int r = Integer.valueOf(lowerHex.substring(0, 2), 16);
+        int g = Integer.valueOf(lowerHex.substring(2, 4), 16);
+        int b = Integer.valueOf(lowerHex.substring(4, 6), 16);
         return new int[]{r, g, b};
-    }
-
-    protected static String hexFromRGB(int rValue, int gValue, int bValue) {
-        return String.format("%02x%02x%02x", rValue, gValue, bValue);
     }
 
     protected String getColorName() {

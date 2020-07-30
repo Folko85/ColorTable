@@ -15,8 +15,8 @@ public class BucketOfColor {
     private static final int bCodeIndex = 2;
     private static final int minRangeIndex = 0;
     private static final int maxRangeIndex = 1;
-    private int[] startCoordinates;   // размер задан заранее в нашем случае
-    private int[] endCoordinates;     // поэтому мы фиксируем ещё и разброс точкее по осям
+    private final int[] startCoordinates;   // размер задан заранее в нашем случае
+    private final int[] endCoordinates;     // поэтому мы фиксируем ещё и разброс точкее по осям
     private int[] rRange = new int[2];
     private int[] gRange = new int[2];
     private int[] bRange = new int[2];
