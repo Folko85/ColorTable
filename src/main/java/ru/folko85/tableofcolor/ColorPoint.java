@@ -36,6 +36,10 @@ public class ColorPoint implements Comparable<ColorPoint> {
         return new int[]{r, g, b};
     }
 
+    protected static String rgbToHex(int r, int g, int b) {
+        return String.format("%02x%02x%02x", r, g, b);
+    }
+
     protected String getColorName() {
         return this.colorName;
     }

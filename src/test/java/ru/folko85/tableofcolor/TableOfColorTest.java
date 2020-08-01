@@ -20,7 +20,7 @@ public class TableOfColorTest {
 
     @Before
     public void setUp() {
-        table = new TableOfColor(new Locale("en"));
+        table = new TableOfColor(new Locale("ru"));
     }
 
     @Test
@@ -38,8 +38,8 @@ public class TableOfColorTest {
 
     @Test
     public void testFindNamedColorFromHex() {
-        String code = "ABAB09";
-        String mustBe = "DarkGoldenrod";
+        String code = "ab67fa";
+        String mustBe = "Аметистовый";
         String really = table.findNamedColorFromHex(code);
         assertEquals(mustBe, really);
     }

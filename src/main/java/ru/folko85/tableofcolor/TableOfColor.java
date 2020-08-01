@@ -12,7 +12,7 @@ public class TableOfColor {
     private final List<BucketOfColor> buckets = new ArrayList<>();
     private int[] startPoint = new int[]{0, 0, 0};       // все наши цвета находятся в этом диапазоне
     private int[] endPoint = new int[]{256, 256, 256};
-    static int maxPointsCount = 5;        // это значение мы ещё будем вычислять на тестах
+    private static int maxPointsCount = 16;
 
     public TableOfColor(Locale locale) {
         this.locale = locale;
@@ -51,7 +51,9 @@ public class TableOfColor {
     }
 
     private BucketOfColor findBucket(ColorPoint point) {
-        BucketOfColor resultBucket = buckets.stream().filter(bucket -> bucket.isContainPoint(point)).findFirst().orElseThrow(); // находим ведро для точки
+        BucketOfColor resultBucket = buckets.stream()
+                .filter(bucket -> bucket.isContainPoint(point))
+                .findFirst().orElseThrow(); // находим ведро для точки
         if (resultBucket.getSize() < maxPointsCount) {
             return resultBucket;
         } else {
@@ -108,10 +110,14 @@ public class TableOfColor {
                 return minDistancePoint.getKey();
             }
             Map.Entry<String, Double> secondPoint = getNearestNamedColor(secondArea, targetPoint);
-
             return (secondPoint.getValue() < minDistancePoint.getValue()) ? secondPoint.getKey() : minDistancePoint.getKey();
             // без тернарного оператора нам не обойтись
         }
+    }
+
+    public String findNamedColorFromRGB(int r, int g, int b) {
+        String hexCode = ColorPoint.rgbToHex(r, g, b);
+        return findNamedColorFromHex(hexCode);
     }
 
     private static Map.Entry<String, Double> getNearestNamedColor(List<ColorPoint> candidates, ColorPoint targetPoint) {
