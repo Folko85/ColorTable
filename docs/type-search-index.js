@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"ru.folko85.tableofcolor","l":"BucketOfColor"},{"p":"ru.folko85.tableofcolor","l":"ColorPoint"},{"p":"ru.folko85.tableofcolor","l":"TableOfColor"}]
