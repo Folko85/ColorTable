@@ -1,6 +1,8 @@
 # ColorTable
 Таблица цветов
 
+Теперь доступен <a href = "https://folko85.github.io/ColorTable">Javadoc.</a> 
+
 Библиотека основана на упрощённой реализации метода вёдер kd-дерева. Возможно будет дорабатываться, но это не точно.
 
 Чтобы подключить репозиторий через Maven, добавьте в pom.xml
@@ -32,7 +34,7 @@ P.S. Зависимость может подсвечиваться красны
 
 Пример использования.
 
-    String hexCode = FF00FF;
+    String hexCode = "FF00FF";
     ColorTable colorTable = new ColorTable(new Locale("ru"));
     String color = colorTable.findNamedColorFromHex(hexCode);
     System.out.println(color);
