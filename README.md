@@ -35,7 +35,7 @@ P.S. Зависимость может подсвечиваться красны
 Пример использования.
 
     String hexCode = "FF00FF";
-    ColorTable colorTable = new ColorTable(new Locale("ru"));
+    TableOfColor colorTable = new TableOfColor(new Locale("ru"));
     String color = colorTable.findNamedColorFromHex(hexCode);
     System.out.println(color);
     
